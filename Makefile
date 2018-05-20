@@ -6,7 +6,7 @@ teste: main.o
 		gcc -o teste main.o
 #-----> Distancia com o botão TAB ### e não com espaços
 main.o: main.c 
-		gcc -o main.o -c main.c -W -Wall -ansi -pedantic
+		gcc -o main.o -c main.c -W -Wall
 clean:
 		rm -rf *.o
 mrproper: clean

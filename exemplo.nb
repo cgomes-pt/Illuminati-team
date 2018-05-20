@@ -4,9 +4,3 @@ Agora podemos ordenar estes ficheiros:
 $| sort
 E escolher o primeiro:
 $| head -1
-ewqewq
-escolherqw
-escolherwq
-escolherqwe
-qw
-eqewqewqeqweqweqw
