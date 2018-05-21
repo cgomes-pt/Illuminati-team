@@ -110,14 +110,16 @@ void lerFicheiro (const char* dump_path) {
 
 */
 
-int main () {
-    int fd = open("exemplo.nb",O_RDONLY,0666);
+
+void passaParaEstrutura(const char* dump_path) {
+    int fd = open(dump_path,O_RDONLY,0666);
     char buffer[256];
     char *buf = buffer;
     int rd;
     int numcomandos=0;
+
     while ( 1 ) {
-        rd = readln(fd,buf,256);
+        rd = readln(fd,buf,258);
       //  printf("rd=%d",rd);
         if (rd<=0) break;
         buf[rd]='\0';
@@ -155,5 +157,19 @@ int main () {
             printf("Comando%d,Argumento%d::::%s\n",i,j,cmds[i].args[j]);
         } 
     }
+
+
+}
+
+int main (int argc, char* argv[]) {
+    
+    if (argc < 2) {
+        fprintf(stderr, "Preciso do ficheiro.\n");
+        exit(1);
+    }
+    printf("\033[H\033[J");
+    passaParaEstrutura(argv[1]);
+  
+    
     return 0;
 }
