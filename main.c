@@ -167,45 +167,42 @@ void passaParaEstrutura(const char* dump_path) {
 
 
 int correComando(int i) { // i== comando i a correr
-
-    char fichoutput[15];
-    char fichinput[15];
+    
+    char resultado[11];
+    char fichoutput[8];
+    char fichinput[8];
     int fdinput;
     
-    
+    sprintf( resultado, "Resultado%d",i); 
     sprintf( fichoutput, "Output%d",i);
-    printf ("%s",fichoutput);
-    int teste = mkfifo(fichoutput,0666);
-    
-    printf ("%d\n",teste) ;
-    
-    size_t fd = open(fichoutput,O_WRONLY | O_CREAT | O_NONBLOCK);
+
+    int fifoout = mkfifo(fichoutput,0666);
+    int fifores=0,fdres=0;
+   //  fifores = mkfifo(resultado,0666);
+
+    if (fifoout<0 || fifores<0) {
+        printf("error mkfifo\n"); return -1;
+    }
+
+    size_t fd = open(fichoutput,O_WRONLY| O_NONBLOCK );
     
     if (fd<0)  {
-     perror("r1");
-     return 1;
+        perror("r1");
+        return -1;
     }
 
     cmds[i].args[cmds[i].numargs]=NULL;
-
-    
-    
-   
-    
-    
-    
-    
     if (cmds[i].compipe==0) { // ==0 tem de ler input do comando anterior
         if(i==0) {
             printf("ERROR-Cant put a pipe on the first command");
-            return ;
+            return -1;
         }
         sprintf( fichinput, "Output%d",i-1);
-        fdinput = open(fichinput,O_RDONLY); 
+        fdinput = open(fichinput,O_RDONLY| O_NONBLOCK); 
         
         if (fdinput==-1) {
             printf("erro abrir pipe");
-            return;
+            return -1;
         }
     }
 
@@ -214,13 +211,28 @@ int correComando(int i) { // i== comando i a correr
     if(f!=0)  wait(NULL);
 
     if (f==0) {
+        if (cmds[i].compipe==0 && i!=0) dup2(0,fdinput);
+        int f2=fork();
+        if(f2==0) {
+            fdres = open(resultado,O_WRONLY |O_CREAT |O_NONBLOCK);
+            if (fdres<0)  {
+                perror("r1");
+                return -1;
+            }
+            dup2(fdres,1);
+            execvp(cmds[i].args[0],cmds[i].args);
+            exit(-1);
+        }
         dup2(fd,1);
-        if (cmds[i].compipe==0 && i!=0) dup2(fdinput,0);
+        wait(NULL);
         execvp(cmds[i].args[0],cmds[i].args);
         exit(-1);
     }
 
   close(fd);
+  close(fdinput);
+  close(fdres);
+  return 0;
 
 }
 
@@ -237,7 +249,6 @@ int main (int argc, char* argv[]) {
     for( i=0;i<numcomandos;i++){
         correComando(i);
     }
-    
     return 0;
 }
 

@@ -10,5 +10,6 @@ main.o: main.c
 clean:
 		rm -rf *.o
 		rm -rf Out*
+		rm -rf Res*
 mrproper: clean
 		rm -rf teste
