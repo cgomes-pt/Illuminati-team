@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #define BUFSIZE 128
  
 
@@ -28,9 +29,11 @@ typedef struct comando {
     char *args[BUFSIZE]; 
     int numargs; //numero de args;
     int compipe;  // se compipe==0 tem '$|' senão é '$'
+  //  int fdpipe[2]; //2 pipes com o output deste comando  , fdpipe[0] vai ser lido para o possivel input do proximo comando, fdpipe[1] é para imprimir no notebook
 };
 
 struct comando cmds[BUFSIZE];
+int numcomandos=0;
 /*
 typedef struct file {
     char *conteudo;
@@ -116,7 +119,6 @@ void passaParaEstrutura(const char* dump_path) {
     char buffer[256];
     char *buf = buffer;
     int rd;
-    int numcomandos=0;
 
     while ( 1 ) {
         rd = readln(fd,buf,258);
@@ -151,12 +153,47 @@ void passaParaEstrutura(const char* dump_path) {
             numcomandos++;
         }
     }
+    /*
     int i,j;
     for( i=0;i<numcomandos;i++){
         for ( j=0; j<cmds[i].numargs;j++) {
+       //     if (j+1==cmds[i].numargs)  cmds[i].args[j+1]=NULL;
             printf("Comando%d,Argumento%d::::%s\n",i,j,cmds[i].args[j]);
         } 
     }
+
+*/
+}
+
+
+void correComando(int i) { // i== comando i a correr
+
+    char fichoutput[15];
+    char fichinput[15];
+    int fdinput;
+    sprintf( fichoutput, "Output%d",i);
+    mkfifo(fichoutput,0666);
+    int fd = open(fichoutput,O_WRONLY); 
+    if (fd==-1) {printf("erro abrir pipe");return;}
+    cmds[i].args[cmds[i].numargs]=NULL;
+    if (cmds[i].compipe==0) { // ==0 tem de ler input do comando anterior
+        if(i==0) {
+            printf("ERROR-Cant put a pipe on the first command");
+            return ;
+        }
+        sprintf( fichinput, "Output%d",i-1);
+        fdinput = open(fichinput,O_RDONLY); 
+        if (fdinput==-1) {printf("erro abrir pipe");return;}
+    }
+    int f=fork();
+    if(f!=0)  wait(NULL);
+    if (f==0) {
+        dup2(fd,1);
+        if (cmds[i].compipe==0 && i!=0) dup2(fdinput,0);
+        execvp(cmds[i].args[0],cmds[i].args);
+        exit(-1);
+    }
+
 
 
 }
@@ -169,7 +206,13 @@ int main (int argc, char* argv[]) {
     }
     printf("\033[H\033[J");
     passaParaEstrutura(argv[1]);
-  
+
+    int i;
+    for( i=0;i<numcomandos;i++){
+        correComando(i);
+    }
     
     return 0;
 }
+
+
