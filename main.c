@@ -166,16 +166,35 @@ void passaParaEstrutura(const char* dump_path) {
 }
 
 
-void correComando(int i) { // i== comando i a correr
+int correComando(int i) { // i== comando i a correr
 
     char fichoutput[15];
     char fichinput[15];
     int fdinput;
+    
+    
     sprintf( fichoutput, "Output%d",i);
-    mkfifo(fichoutput,0666);
-    int fd = open(fichoutput,O_WRONLY); 
-    if (fd==-1) {printf("erro abrir pipe");return;}
+    printf ("%s",fichoutput);
+    int teste = mkfifo(fichoutput,0666);
+    
+    printf ("%d\n",teste) ;
+    
+    size_t fd = open(fichoutput,O_WRONLY | O_CREAT | O_NONBLOCK);
+    
+    if (fd<0)  {
+     perror("r1");
+     return 1;
+    }
+
     cmds[i].args[cmds[i].numargs]=NULL;
+
+    
+    
+   
+    
+    
+    
+    
     if (cmds[i].compipe==0) { // ==0 tem de ler input do comando anterior
         if(i==0) {
             printf("ERROR-Cant put a pipe on the first command");
@@ -183,10 +202,17 @@ void correComando(int i) { // i== comando i a correr
         }
         sprintf( fichinput, "Output%d",i-1);
         fdinput = open(fichinput,O_RDONLY); 
-        if (fdinput==-1) {printf("erro abrir pipe");return;}
+        
+        if (fdinput==-1) {
+            printf("erro abrir pipe");
+            return;
+        }
     }
+
     int f=fork();
+
     if(f!=0)  wait(NULL);
+
     if (f==0) {
         dup2(fd,1);
         if (cmds[i].compipe==0 && i!=0) dup2(fdinput,0);
@@ -194,7 +220,7 @@ void correComando(int i) { // i== comando i a correr
         exit(-1);
     }
 
-
+  close(fd);
 
 }
 
