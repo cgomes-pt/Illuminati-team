@@ -1,6 +1,9 @@
-Este comando lista os ficheiros:
-$ ls -all
+$ ls
 Agora podemos ordenar estes ficheiros:
 $| sort
 E escolher o primeiro:
-$| head -1
+$| head -5
+Tail do anterior
+$| tail -1
+Grep do ls
+$| grep notebook

@@ -13,7 +13,7 @@
 
 ssize_t readln(int fildes, void *buf, size_t nbyte){
 	int rd;
-	int lidas=0;
+	size_t lidas=0;
 	char *p=buf;
 	while ( (rd=read(fildes,p,1))>=0 && *p!='\n' ) {
 		if (nbyte<lidas) return lidas;
@@ -30,7 +30,7 @@ typedef struct comando {
     int numargs; //numero de args;
     int compipe;  // se compipe==0 tem '$|' senão é '$'
   //  int fdpipe[2]; //2 pipes com o output deste comando  , fdpipe[0] vai ser lido para o possivel input do proximo comando, fdpipe[1] é para imprimir no notebook
-};
+}comandos;
 
 struct comando cmds[BUFSIZE];
 int numcomandos=0;
@@ -169,27 +169,27 @@ void passaParaEstrutura(const char* dump_path) {
 int correComando(int i) { // i== comando i a correr
     
     char resultado[11];
-    char fichoutput[8];
-    char fichinput[8];
-    int fdinput;
+    char fichoutput[11];
+    char fichinput[11];
+    size_t fdinput;
     
     sprintf( resultado, "Resultado%d",i); 
-    sprintf( fichoutput, "Output%d",i);
+   // sprintf( fichoutput, "Output%d",i);
 
-    int fifoout = mkfifo(fichoutput,0666);
-    int fifores=0,fdres=0;
+   // size_t fifoout = mkfifo(fichoutput,0666);
+    size_t fifores=0,fdres=0;
    //  fifores = mkfifo(resultado,0666);
 
-    if (fifoout<0 || fifores<0) {
-        printf("error mkfifo\n"); return -1;
-    }
+   // if (fifoout<0 || fifores<0) {
+     //   printf("error mkfifo\n"); return -1;
+   // }
 
-    size_t fd = open(fichoutput,O_WRONLY| O_NONBLOCK );
+  //  size_t fd = open(fichoutput,O_WRONLY| O_NONBLOCK );
     
-    if (fd<0)  {
-        perror("r1");
-        return -1;
-    }
+  //  if (fd<0)  {
+    //    perror("r1");
+      //  return -1;
+   // }
 
     cmds[i].args[cmds[i].numargs]=NULL;
     if (cmds[i].compipe==0) { // ==0 tem de ler input do comando anterior
@@ -197,23 +197,25 @@ int correComando(int i) { // i== comando i a correr
             printf("ERROR-Cant put a pipe on the first command");
             return -1;
         }
-        sprintf( fichinput, "Output%d",i-1);
-        fdinput = open(fichinput,O_RDONLY| O_NONBLOCK); 
+        sprintf( fichinput, "Resultado%d",i-1);
+        fdinput = open(fichinput,O_RDONLY,0666); 
         
-        if (fdinput==-1) {
+        if (fdinput<0) {
             printf("erro abrir pipe");
+            perror("r2");
             return -1;
         }
     }
 
     int f=fork();
 
-    if(f!=0)  wait(NULL);
+    if(f!=0)  wait(NULL); //pai0
 
-    if (f==0) {
-        if (cmds[i].compipe==0 && i!=0) dup2(0,fdinput);
-        int f2=fork();
-        if(f2==0) {
+    else { //filho0
+        if (cmds[i].compipe==0 && i!=0) dup2(fdinput,0);
+     //   int f2=fork();
+       int f2=0;
+        if(f2==0) { //filho1
             fdres = open(resultado,O_WRONLY |O_CREAT |O_NONBLOCK);
             if (fdres<0)  {
                 perror("r1");
@@ -223,13 +225,13 @@ int correComando(int i) { // i== comando i a correr
             execvp(cmds[i].args[0],cmds[i].args);
             exit(-1);
         }
-        dup2(fd,1);
-        wait(NULL);
-        execvp(cmds[i].args[0],cmds[i].args);
-        exit(-1);
+    //    dup2(fd,1);
+      //  wait(NULL);
+       // execvp(cmds[i].args[0],cmds[i].args);
+       // exit(-1);
     }
 
-  close(fd);
+ // close(fd);
   close(fdinput);
   close(fdres);
   return 0;
@@ -242,7 +244,7 @@ int main (int argc, char* argv[]) {
         fprintf(stderr, "Preciso do ficheiro.\n");
         exit(1);
     }
-    printf("\033[H\033[J");
+  // printf("\033[H\033[J");
     passaParaEstrutura(argv[1]);
 
     int i;
