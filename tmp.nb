@@ -13,7 +13,6 @@ teste
 testeRes
 testeres.c
 workspaceSO.code-workspace
-
 <<<
 Agora podemos ordenar estes ficheiros:
 $| sort
@@ -31,7 +30,6 @@ teste
 testeRes
 testeres.c
 workspaceSO.code-workspace
-
 <<<
 E escolher o primeiro:
 $| head -5
@@ -41,13 +39,11 @@ bteste
 enunciado-so-2017-18.pdf
 exemplo.nb
 main.c
-
 <<<
 Tail do anterior
 $| tail -1
 >>>
 main.c
-
 <<<
 Grep do ls
 $| grep notebook

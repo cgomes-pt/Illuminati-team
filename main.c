@@ -239,12 +239,12 @@ int correComando(int i) { // i== comando i a correr
 }
 
 void atualizaFicheiro () {
-    char buffer[500];
+    char buffer[1500];
 
     ssize_t rd; ssize_t output;
     int fdNB,fdTemp, fdres;
 
-    fdNB = open("exemplo.nb",O_RDWR,0666);
+    fdNB = open("exemplo.nb",O_RDONLY,0666);
     fdTemp = open("tmp.nb",O_WRONLY |O_APPEND |  O_CREAT, 0666);
 
     if(fdNB==-1 || fdTemp==-1 ){
@@ -254,12 +254,13 @@ void atualizaFicheiro () {
 
     char resultado[11];
     int i=0;
+    int oldres=0;
     while (1) {
         
-        rd = readln(fdNB,buffer,258);
+        rd = readln(fdNB,buffer,1500);
         if (rd<=0) break;
         
-        if (buffer[0]=='$') {
+        if ( oldres==0 && buffer[0]=='$') {
             
             write(fdTemp,buffer,rd);
             sprintf( resultado, "Resultado%d",i);
@@ -269,24 +270,38 @@ void atualizaFicheiro () {
                 return;
             }
 
-            while (output=read(fdres,buffer,500)) {
+            while (output=read(fdres,buffer,1500)) {
                 write(fdTemp,"\n>>>\n",5);
                 write(fdTemp,buffer,output);
-                write(fdTemp,"\n<<<\n",5);
+                write(fdTemp,"<<<\n",4);
             }
             i++;
             close(fdres);
         }
         else {
-
-            write(fdTemp,buffer,rd);
-            write(fdTemp,"\n",1);
+            if (buffer[0]=='>'&&buffer[1]=='>'&&buffer[2]=='>') {
+                oldres=1;
+            }
+            if (oldres==0) {
+                write(fdTemp,buffer,rd);
+                write(fdTemp,"\n",1);
+            }
+            if (buffer[0]=='<'&&buffer[1]=='<'&&buffer[2]=='<') {
+                oldres=0;
+            }
 
         }
-        
-       
-       // write(fd1,buffer,nrd);
+
     }
+
+    close(fdNB);
+    close(fdTemp);
+
+    fdNB = open("exemplo.nb",O_WRONLY,0666);
+    fdTemp = open("tmp.nb",O_RDONLY, 0666);
+    rd = read(fdTemp,buffer,1500);
+    if (rd>=0)
+            write(fdNB,buffer,rd);
 
     close(fdNB);
     close(fdTemp);
