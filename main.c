@@ -238,6 +238,67 @@ int correComando(int i) { // i== comando i a correr
 
 }
 
+void atualizaFicheiro () {
+    char buffer[500];
+
+    ssize_t rd; ssize_t output;
+    int fdNB,fdTemp, fdres;
+
+    fdNB = open("exemplo.nb",O_RDWR,0666);
+    fdTemp = open("tmp.nb",O_WRONLY |O_APPEND |  O_CREAT, 0666);
+
+    if(fdNB==-1 || fdTemp==-1 ){
+        printf("file not found.\n");
+        return;
+    }
+
+    char resultado[11];
+    int i=0;
+    while (1) {
+        
+        rd = readln(fdNB,buffer,258);
+        if (rd<=0) break;
+        
+        if (buffer[0]=='$') {
+            
+            write(fdTemp,buffer,rd);
+            sprintf( resultado, "Resultado%d",i);
+            fdres = open(resultado,O_RDONLY,0666);
+            if(fdres==-1){
+                printf("file not found.\n");
+                return;
+            }
+
+            while (output=read(fdres,buffer,500)) {
+                write(fdTemp,"\n>>>\n",5);
+                write(fdTemp,buffer,output);
+                write(fdTemp,"\n<<<\n",5);
+            }
+            i++;
+            close(fdres);
+        }
+        else {
+
+            write(fdTemp,buffer,rd);
+            write(fdTemp,"\n",1);
+
+        }
+        
+       
+       // write(fd1,buffer,nrd);
+    }
+
+    close(fdNB);
+    close(fdTemp);
+
+
+
+}
+
+
+
+
+
 int main (int argc, char* argv[]) {
     
     if (argc < 2) {
@@ -251,6 +312,8 @@ int main (int argc, char* argv[]) {
     for( i=0;i<numcomandos;i++){
         correComando(i);
     }
+
+    atualizaFicheiro();
     return 0;
 }
 

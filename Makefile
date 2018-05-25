@@ -9,7 +9,7 @@ main.o: main.c
 		gcc -o main.o -c main.c -W -Wall
 clean:
 		rm -rf *.o
-		rm -rf Out*
+		rm -rf tmp.nb
 		rm -rf Res*
 mrproper: clean
 		rm -rf teste

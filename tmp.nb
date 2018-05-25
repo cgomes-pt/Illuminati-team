@@ -1,0 +1,53 @@
+$ ls
+>>>
+ateste
+bteste
+enunciado-so-2017-18.pdf
+exemplo.nb
+main.c
+main.o
+Makefile
+README.md
+Resultado0
+teste
+testeRes
+testeres.c
+workspaceSO.code-workspace
+
+<<<
+Agora podemos ordenar estes ficheiros:
+$| sort
+>>>
+ateste
+bteste
+enunciado-so-2017-18.pdf
+exemplo.nb
+main.c
+main.o
+Makefile
+README.md
+Resultado0
+teste
+testeRes
+testeres.c
+workspaceSO.code-workspace
+
+<<<
+E escolher o primeiro:
+$| head -5
+>>>
+ateste
+bteste
+enunciado-so-2017-18.pdf
+exemplo.nb
+main.c
+
+<<<
+Tail do anterior
+$| tail -1
+>>>
+main.c
+
+<<<
+Grep do ls
+$| grep notebook
