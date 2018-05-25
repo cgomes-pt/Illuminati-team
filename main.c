@@ -216,7 +216,7 @@ int correComando(int i) { // i== comando i a correr
      //   int f2=fork();
        int f2=0;
         if(f2==0) { //filho1
-            fdres = open(resultado,O_WRONLY |O_CREAT |O_NONBLOCK);
+            fdres = open(resultado,O_WRONLY |O_CREAT,0666);
             if (fdres<0)  {
                 perror("r1");
                 return -1;
