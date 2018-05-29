@@ -305,6 +305,7 @@ void atualizaFicheiro () {
 
     close(fdNB);
     close(fdTemp);
+    remove("tmp.nb");
 
 
 

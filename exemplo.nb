@@ -2,6 +2,7 @@ $ ls
 >>>
 ateste
 bteste
+cteste
 enunciado-so-2017-18.pdf
 exemplo.nb
 main.c
@@ -9,6 +10,10 @@ main.o
 Makefile
 README.md
 Resultado0
+Resultado1
+Resultado2
+Resultado3
+Resultado4
 teste
 testeRes
 testeres.c
@@ -19,6 +24,7 @@ $| sort
 >>>
 ateste
 bteste
+cteste
 enunciado-so-2017-18.pdf
 exemplo.nb
 main.c
@@ -26,6 +32,10 @@ main.o
 Makefile
 README.md
 Resultado0
+Resultado1
+Resultado2
+Resultado3
+Resultado4
 teste
 testeRes
 testeres.c
@@ -36,14 +46,14 @@ $| head -5
 >>>
 ateste
 bteste
+cteste
 enunciado-so-2017-18.pdf
 exemplo.nb
-main.c
 <<<
 Tail do anterior
 $| tail -1
 >>>
-main.c
+exemplo.nb
 <<<
 Grep do ls
 $| grep notebook
