@@ -172,7 +172,9 @@ int correComando(int i) { // i== comando i a correr
     char fichoutput[11];
     char fichinput[11];
     size_t fdinput;
-    
+    int funcionou = 0;
+
+
     sprintf( resultado, "Resultado%d",i); 
    // sprintf( fichoutput, "Output%d",i);
 
@@ -222,7 +224,8 @@ int correComando(int i) { // i== comando i a correr
                 return -1;
             }
             dup2(fdres,1);
-            execvp(cmds[i].args[0],cmds[i].args);
+            funcionou = execvp(cmds[i].args[0],cmds[i].args);
+            
             exit(-1);
         }
     //    dup2(fd,1);
@@ -234,7 +237,7 @@ int correComando(int i) { // i== comando i a correr
  // close(fd);
   close(fdinput);
   close(fdres);
-  return 0;
+  return funcionou;
 
 }
 
@@ -316,7 +319,8 @@ void atualizaFicheiro () {
 
 
 int main (int argc, char* argv[]) {
-    
+    int condicao = 0;
+
     if (argc < 2) {
         fprintf(stderr, "Preciso do ficheiro.\n");
         exit(1);
@@ -326,10 +330,11 @@ int main (int argc, char* argv[]) {
 
     int i;
     for( i=0;i<numcomandos;i++){
-        correComando(i);
+        condicao = correComando(i);
+        if (condicao==-1) break;
     }
 
-    atualizaFicheiro();
+    if (condicao!=-1) atualizaFicheiro();
     return 0;
 }
 
