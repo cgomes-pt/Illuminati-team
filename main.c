@@ -29,90 +29,9 @@ typedef struct comando {
     char *args[BUFSIZE]; 
     int numargs; //numero de args;
     int compipe;  // se compipe==0 tem '$|' senão é '$'
-  //  int fdpipe[2]; //2 pipes com o output deste comando  , fdpipe[0] vai ser lido para o possivel input do proximo comando, fdpipe[1] é para imprimir no notebook
-}comandos;
 
 struct comando cmds[BUFSIZE];
 int numcomandos=0;
-/*
-typedef struct file {
-    char *conteudo;
-}*ficheiro;
-
-
-
-
-
-
-int parse_output(char *cmd) {
-    
-    int i = 0;
-    
-    char buf[BUFSIZE];
-    FILE *fp;
-
-    if ((fp = popen(cmd, "r")) == NULL) {
-        printf("Error opening pipe!\n");
-        return -1;
-    }
-
-    while (fgets(buf, BUFSIZE, fp) != NULL) {
-        sscanf(buf,"%s", &outputs[i].resultado);
-        printf("OUTPUT 1 : %s\n", &(outputs[i].resultado));i++;
-
-    }
-    
-
-    if(pclose(fp))  {
-        printf("Command not found or exited with error status\n");
-        return -1;
-    }
-
-    return 0;
-}
-
-
-
-char* apagarDollarIcone (char *buffer) {
-    int i = 0 ;
-    int j = 0;
-    char *resultado=malloc(sizeof(char));
-   
-   
-    for (i=0;buffer[i]!='\0';i++) {
-
-        if (buffer[i]!='$') {
-            resultado[j++] = buffer[i];
-
-        }
-
-
-    }
-    return resultado;
-}
-
-void lerFicheiro (const char* dump_path) {
-
-    int c;
-    FILE *file;
-    file = fopen(dump_path, "r");
-    char buffer[256];
-    char *teste;
-
-    
-    while(fgets(buffer, 256, file)) {
-         if (buffer[0]=='$' && buffer[1] !='|') {
-             printf ("%s",apagarDollarIcone("$ ls"));
-             printf ("%d\n",parse_output(apagarDollarIcone("$ ls")));
-         }
-    
-    }
-    fclose(file);
-     
-}
-
-*/
-
 
 void passaParaEstrutura(const char* dump_path) {
     int fd = open(dump_path,O_RDONLY,0666);
@@ -122,13 +41,9 @@ void passaParaEstrutura(const char* dump_path) {
 
     while ( 1 ) {
         rd = readln(fd,buf,258);
-      //  printf("rd=%d",rd);
         if (rd<=0) break;
         buf[rd]='\0';
         if(buf[0]=='$') {
-        //           printf("buf=%s\n",buf);
-            //struct comando cmd;
-           // cmd =malloc(sizeof(char*) + sizeof(int) + sizeof(int) );
             cmds[numcomandos].numargs=0;
             if(rd>1 && buf[1]=='|') {
                 cmds[numcomandos].compipe = 0;
@@ -153,50 +68,32 @@ void passaParaEstrutura(const char* dump_path) {
             numcomandos++;
         }
     }
-    /*
-    int i,j;
-    for( i=0;i<numcomandos;i++){
-        for ( j=0; j<cmds[i].numargs;j++) {
-       //     if (j+1==cmds[i].numargs)  cmds[i].args[j+1]=NULL;
-            printf("Comando%d,Argumento%d::::%s\n",i,j,cmds[i].args[j]);
-        } 
-    }
 
-*/
 }
 
 
 int correComando(int i) { // i== comando i a correr
-    
+
     char resultado[11];
     char fichoutput[11];
     char fichinput[11];
     size_t fdinput;
     int funcionou = 0;
-
-
-    sprintf( resultado, "Resultado%d",i); 
-   // sprintf( fichoutput, "Output%d",i);
-
-   // size_t fifoout = mkfifo(fichoutput,0666);
-    size_t fifores=0,fdres=0;
-   //  fifores = mkfifo(resultado,0666);
-
-   // if (fifoout<0 || fifores<0) {
-     //   printf("error mkfifo\n"); return -1;
-   // }
-
-  //  size_t fd = open(fichoutput,O_WRONLY| O_NONBLOCK );
+    int w;
     
-  //  if (fd<0)  {
-    //    perror("r1");
-      //  return -1;
-   // }
+    int fderro;
+    if((fderro=open("ERRORFILE",O_CREAT|O_WRONLY,0644))!=-1){
+        dup2(fderro,2);
+    }
+    else printf("Erro abrir ERRORFILE\n");
+    
+    sprintf( resultado, "Resultado%d",i); 
+    size_t fifores=0,fdres=0;
 
     cmds[i].args[cmds[i].numargs]=NULL;
     if (cmds[i].compipe==0) { // ==0 tem de ler input do comando anterior
         if(i==0) {
-            printf("ERROR-Cant put a pipe on the first command");
+            printf("ERRO-o primeiro comando não pode ter pipe");
             return -1;
         }
         sprintf( fichinput, "Resultado%d",i-1);
@@ -211,43 +108,38 @@ int correComando(int i) { // i== comando i a correr
 
     int f=fork();
 
-    if(f!=0)  wait(NULL); //pai0
+    if(f!=0)  wait(&w); //pai
 
-    else { //filho0
+    else { //filho
         if (cmds[i].compipe==0 && i!=0) dup2(fdinput,0);
-     //   int f2=fork();
-       int f2=0;
-        if(f2==0) { //filho1
+
             fdres = open(resultado,O_WRONLY |O_CREAT,0666);
             if (fdres<0)  {
                 perror("r1");
                 return -1;
             }
             dup2(fdres,1);
-            funcionou = execvp(cmds[i].args[0],cmds[i].args);
-            
-            exit(-1);
-        }
-    //    dup2(fd,1);
-      //  wait(NULL);
-       // execvp(cmds[i].args[0],cmds[i].args);
-       // exit(-1);
+            execvp(cmds[i].args[0],cmds[i].args);
+            exit(33); // WEXITSTATUS(w) é 33 se a execução falhar
+
     }
 
- // close(fd);
   close(fdinput);
   close(fdres);
-  return funcionou;
+  close(fderro);
+
+  
+  return WEXITSTATUS(w);
 
 }
 
-void atualizaFicheiro () {
+void atualizaFicheiro (char* file) {
     char buffer[1500];
 
     ssize_t rd; ssize_t output;
     int fdNB,fdTemp, fdres;
 
-    fdNB = open("exemplo.nb",O_RDONLY,0666);
+    fdNB = open(file,O_RDONLY,0666);
     fdTemp = open("tmp.nb",O_WRONLY |O_APPEND |  O_CREAT, 0666);
 
     if(fdNB==-1 || fdTemp==-1 ){
@@ -300,7 +192,7 @@ void atualizaFicheiro () {
     close(fdNB);
     close(fdTemp);
 
-    fdNB = open("exemplo.nb",O_WRONLY,0666);
+    fdNB = open(file,O_WRONLY,0666);
     fdTemp = open("tmp.nb",O_RDONLY, 0666);
     rd = read(fdTemp,buffer,1500);
     if (rd>=0)
@@ -315,27 +207,44 @@ void atualizaFicheiro () {
 }
 
 
-
+int checkStderr() {
+        
+        char buffer[1500];
+        int fderro = open("ERRORFILE",O_RDONLY,0666);
+        if (fderro<0) return -1;
+        int rd = read(fderro,buffer,1500);
+        return rd;
+           
+}
 
 
 int main (int argc, char* argv[]) {
+    int erros=0;
     int condicao = 0;
-
+    int ret=-1;
     if (argc < 2) {
-        fprintf(stderr, "Preciso do ficheiro.\n");
+        fprintf(stderr, "Preciso do ficheiro do notebook como argumento.\n");
         exit(1);
     }
-  // printf("\033[H\033[J");
     passaParaEstrutura(argv[1]);
 
     int i;
     for( i=0;i<numcomandos;i++){
         condicao = correComando(i);
-        if (condicao==-1) break;
+        erros= checkStderr();
+        if (condicao==33 || erros!=0 || condicao==-1) break;
     }
 
-    if (condicao!=-1) atualizaFicheiro();
-    return 0;
+    if (condicao!=33 && erros==0 && condicao!=-1) {
+        atualizaFicheiro(argv[1]);
+        ret=0;
+    }
+    else {
+       if (condicao==33) printf("Erro no Comando %s.\nNotebook não alterado.\n",cmds[i].args[0]);
+       if (erros!=0) printf("Comando %s escreveu para o stderr.\nNotebook não alterado.\n",cmds[i].args[0]);
+      
+    }
+    return ret;
 }
 
 

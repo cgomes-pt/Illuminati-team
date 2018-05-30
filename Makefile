@@ -11,5 +11,6 @@ clean:
 		rm -rf *.o
 		rm -rf tmp.nb
 		rm -rf Res*
+		rm -rf ERRORFILE
 mrproper: clean
 		rm -rf teste

@@ -1,5 +1,63 @@
-$ aAgora podemos ordenar estes ficheiros:
-$| sortE escolher o primeiro:
-$| head -5Tail do anterior
-$| tail -1Grep do ls
-$| grep notebookbook
+$ ls
+>>>
+ateste
+bteste
+cteste
+enunciado-so-2017-18.pdf
+ERRORFILE
+exemplo.nb
+hello
+main.c
+Makefile
+README.md
+Resultado0
+Resultado1
+Resultado2
+Resultado3
+Resultado4
+strderr.txt
+teste
+testeRes
+testeres.c
+workspaceSO.code-workspace
+<<<
+Agora podemos ordenar estes ficheiros:
+$| sort
+>>>
+ateste
+bteste
+cteste
+enunciado-so-2017-18.pdf
+ERRORFILE
+exemplo.nb
+hello
+main.c
+Makefile
+README.md
+Resultado0
+Resultado1
+Resultado2
+Resultado3
+Resultado4
+strderr.txt
+teste
+testeRes
+testeres.c
+workspaceSO.code-workspace
+<<<
+E escolher o primeiro:
+$| head -5
+>>>
+ateste
+bteste
+cteste
+enunciado-so-2017-18.pdf
+ERRORFILE
+<<<
+Tail do anterior
+$| tail -1
+>>>
+ERRORFILE
+<<<
+Grep do ls
+$| grep notebook
