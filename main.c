@@ -29,31 +29,44 @@ typedef struct comando {
     char *args[BUFSIZE]; 
     int numargs; //numero de args;
     int compipe;  // se compipe==0 tem '$|' senão é '$'
-
+    int stdin;
+};
 struct comando cmds[BUFSIZE];
 int numcomandos=0;
-
 void passaParaEstrutura(const char* dump_path) {
     int fd = open(dump_path,O_RDONLY,0666);
     char buffer[256];
     char *buf = buffer;
     int rd;
-
+    char* tk;
     while ( 1 ) {
         rd = readln(fd,buf,258);
         if (rd<=0) break;
         buf[rd]='\0';
         if(buf[0]=='$') {
             cmds[numcomandos].numargs=0;
-            if(rd>1 && buf[1]=='|') {
+            cmds[numcomandos].stdin=-1;
+            if(rd>1 && (buf[1]=='|' || buf[2]=='|' ) ) {
+                if (buf[1]=='|'){
+                    buf= buf + 3; // tira o | $ espaço
+                    cmds[numcomandos].stdin=numcomandos-1;
+                }
+                else {
+                    tk = strtok(buf, "|"); //tk = $num
+                    tk = tk + 1 ; //tk =num
+                    cmds[numcomandos].stdin=numcomandos-atoi(tk);
+                    tk = strtok(NULL, "|"); //tk = comando
+                    buf=tk;
+                    buf = buf +1 ;//tira espaço
+                } 
                 cmds[numcomandos].compipe = 0;
-                buf= buf + 1; // tira o |
-
             }
             else{
-                cmds[numcomandos].compipe = 1;
+                if (rd>1)
+                    cmds[numcomandos].compipe = 1;
+
+                buf= buf + 2; // tira o $ e um espaço
             }
-            buf= buf + 2; // tira o $ e um espaço
             
             const char s[2] = " ";
             char *token;
@@ -91,12 +104,12 @@ int correComando(int i) { // i== comando i a correr
     size_t fifores=0,fdres=0;
 
     cmds[i].args[cmds[i].numargs]=NULL;
-    if (cmds[i].compipe==0) { // ==0 tem de ler input do comando anterior
+    if (cmds[i].compipe==0 && cmds[i].stdin>=0) { // ==0 tem de ler input do comando anterior
         if(i==0) {
             printf("ERRO-o primeiro comando não pode ter pipe");
             return -1;
         }
-        sprintf( fichinput, "Resultado%d",i-1);
+        sprintf( fichinput, "Resultado%d",cmds[i].stdin);
         fdinput = open(fichinput,O_RDONLY,0666); 
         
         if (fdinput<0) {
