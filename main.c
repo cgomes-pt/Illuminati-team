@@ -30,9 +30,10 @@ typedef struct comando {
     int numargs; //numero de args;
     int compipe;  // se compipe==0 tem '$|' senão é '$'
     int stdin;
-};
-struct comando cmds[BUFSIZE];
+}CM;
+CM cmds[BUFSIZE];
 int numcomandos=0;
+
 void passaParaEstrutura(const char* dump_path) {
     int fd = open(dump_path,O_RDONLY,0666);
     char buffer[256];
@@ -88,20 +89,18 @@ void passaParaEstrutura(const char* dump_path) {
 int correComando(int i) { // i== comando i a correr
 
     char resultado[11];
-    char fichoutput[11];
     char fichinput[11];
-    size_t fdinput;
-    int funcionou = 0;
+    int fdinput;
     int w;
     
     int fderro;
-    if((fderro=open("ERRORFILE",O_CREAT|O_WRONLY,0644))!=-1){
+    if((fderro=open("Stderrfile.txt",O_CREAT|O_WRONLY,0644))!=-1){
         dup2(fderro,2);
     }
-    else printf("Erro abrir ERRORFILE\n");
+    else printf("Erro abrir Stderrfile.txt\n");
     
     sprintf( resultado, "Resultado%d",i); 
-    size_t fifores=0,fdres=0;
+    int fdres=0;
 
     cmds[i].args[cmds[i].numargs]=NULL;
     if (cmds[i].compipe==0 && cmds[i].stdin>=0) { // ==0 tem de ler input do comando anterior
@@ -113,7 +112,7 @@ int correComando(int i) { // i== comando i a correr
         fdinput = open(fichinput,O_RDONLY,0666); 
         
         if (fdinput<0) {
-            printf("erro abrir pipe");
+            printf("erro abrir ficheiro");
             perror("r2");
             return -1;
         }
@@ -223,7 +222,7 @@ void atualizaFicheiro (char* file) {
 int checkStderr() {
         
         char buffer[1500];
-        int fderro = open("ERRORFILE",O_RDONLY,0666);
+        int fderro = open("Stderrfile.txt",O_RDONLY,0666);
         if (fderro<0) return -1;
         int rd = read(fderro,buffer,1500);
         return rd;
@@ -257,6 +256,12 @@ int main (int argc, char* argv[]) {
        if (erros!=0) printf("Comando %s escreveu para o stderr.\nNotebook não alterado.\n",cmds[i].args[0]);
       
     }
+    char resultado[11];
+    for( i=0;i<numcomandos;i++){
+        sprintf( resultado, "Resultado%d",i); 
+        remove(resultado);
+    }
+
     return ret;
 }
 

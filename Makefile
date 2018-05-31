@@ -9,8 +9,6 @@ main.o: main.c
 		gcc -o main.o -c main.c -W -Wall
 clean:
 		rm -rf *.o
-		rm -rf tmp.nb
-		rm -rf Res*
-		rm -rf ERRORFILE
+		rm -rf Stderrfile.txt
 mrproper: clean
 		rm -rf teste

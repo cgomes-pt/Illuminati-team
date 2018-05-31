@@ -1,62 +1,12 @@
 $ ls
->>>
-dirteste
-enunciado-so-2017-18.pdf
-ERRORFILE
-exemplo.nb
-main.c
-main.o
-Makefile
-README.md
-Resultado0
-teste
-testeRes
-testeres.c
-workspaceSO.code-workspace
-<<<
 $ ls dirteste
->>>
-file1
-file2
-file3
-<<<
 Agora podemos ordenar estes ficheiros:
 $1| sort
->>>
-file1
-file2
-file3
-<<<
 Agora podemos ordenar estes ficheiros2:
 $3| sort
->>>
-dirteste
-enunciado-so-2017-18.pdf
-ERRORFILE
-exemplo.nb
-main.c
-main.o
-Makefile
-README.md
-Resultado0
-teste
-testeRes
-testeres.c
-workspaceSO.code-workspace
-<<<
 Cabeça do anterior
 $| head -5
->>>
-dirteste
-enunciado-so-2017-18.pdf
-ERRORFILE
-exemplo.nb
-main.c
-<<<
 Tail do anterior
 $| tail -1
->>>
-main.c
-<<<
 Grep do ls
 $| grep notebook
