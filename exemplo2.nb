@@ -1,4 +1,4 @@
-$ ls
+$ a
 Agora podemos ordenar estes ficheiros:
 $| sort
 E escolher o primeiro:

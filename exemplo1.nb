@@ -1,7 +1,10 @@
 $ ls
+$ ls dirteste
 Agora podemos ordenar estes ficheiros:
-$| sort
-E escolher o primeiro:
+$1| sort
+Agora podemos ordenar estes ficheiros2:
+$3| sort
+Cabeça do anterior
 $| head -5
 Tail do anterior
 $| tail -1
