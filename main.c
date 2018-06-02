@@ -36,12 +36,12 @@ int numcomandos=0;
 
 void passaParaEstrutura(const char* dump_path) {
     int fd = open(dump_path,O_RDONLY,0666);
-    char buffer[256];
+    char buffer[100000];
     char *buf = buffer;
     int rd;
     char* tk;
     while ( 1 ) {
-        rd = readln(fd,buf,258);
+        rd = readln(fd,buf,1500);
         if (rd<=0) break;
         buf[rd]='\0';
         if(buf[0]=='$') {
@@ -146,7 +146,7 @@ int correComando(int i) { // i== comando i a correr
 }
 
 void atualizaFicheiro (char* file) {
-    char buffer[1500];
+    char buffer[100000];
 
     ssize_t rd; ssize_t output;
     int fdNB,fdTemp, fdres;
@@ -164,7 +164,7 @@ void atualizaFicheiro (char* file) {
     int oldres=0;
     while (1) {
         
-        rd = readln(fdNB,buffer,1500);
+        rd = readln(fdNB,buffer,100000);
         if (rd<=0) break;
         
         if ( oldres==0 && buffer[0]=='$') {
@@ -177,7 +177,7 @@ void atualizaFicheiro (char* file) {
                 return;
             }
 
-            while (output=read(fdres,buffer,1500)) {
+            while (output=read(fdres,buffer,100000)) {
                 write(fdTemp,"\n>>>\n",5);
                 write(fdTemp,buffer,output);
                 write(fdTemp,"<<<\n",4);
@@ -203,10 +203,10 @@ void atualizaFicheiro (char* file) {
 
     close(fdNB);
     close(fdTemp);
-
-    fdNB = open(file,O_WRONLY,0666);
+    remove(file);
+    fdNB = open(file,O_WRONLY|O_CREAT,0666);
     fdTemp = open("tmp.nb",O_RDONLY, 0666);
-    rd = read(fdTemp,buffer,1500);
+    rd = read(fdTemp,buffer,100000);
     if (rd>=0)
             write(fdNB,buffer,rd);
 
@@ -221,10 +221,10 @@ void atualizaFicheiro (char* file) {
 
 int checkStderr() {
         
-        char buffer[1500];
+        char buffer[10000];
         int fderro = open("Stderrfile.txt",O_RDONLY,0666);
         if (fderro<0) return -1;
-        int rd = read(fderro,buffer,1500);
+        int rd = read(fderro,buffer,100000);
         return rd;
            
 }

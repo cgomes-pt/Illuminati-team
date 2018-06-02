@@ -1,12 +1,7 @@
-$ ls
-$ ls dirteste
+$ a
 Agora podemos ordenar estes ficheiros:
-$1| sort
-Agora podemos ordenar estes ficheiros2:
-$3| sort
-Cabeça do anterior
+$| sort
+E escolher o primeiro:
 $| head -5
 Tail do anterior
 $| tail -1
-Grep do ls
-$| grep notebook
